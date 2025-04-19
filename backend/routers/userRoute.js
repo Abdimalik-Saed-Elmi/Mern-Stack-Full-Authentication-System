@@ -12,8 +12,6 @@ Route.post("/forgot-password", forgotPassword);
 Route.post("/reset-password/:token", resetPassword);
 Route.post('/verify-email', verifyEmail);
 Route.post('/resend-verification-code', resendVerificationCode);
-Route.get('/profile', authenticate, getProfile);
-
 
 
 
