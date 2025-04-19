@@ -42,7 +42,7 @@ const Register = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: "easeInOut" }}
             >
-                <h2 className="text-3xl font-extrabold text-gray-800 mb-8 text-center">Create Account 🚀</h2>
+                <h2 className="text-3xl font-extrabold text-gray-800 mb-8 text-center">Create New Account 🚀</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="relative">
                         <FontAwesomeIcon icon={faUser} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
