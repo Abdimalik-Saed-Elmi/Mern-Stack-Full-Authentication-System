@@ -1,7 +1,6 @@
 import express from 'express'
-import { getProfile, loginUser, Register } from '../controllers/userController.js'
 import { forgotPassword, resendVerificationCode, resetPassword, verifyEmail } from '../controllers/authController.js'
-import { authenticate } from '../middlewares/authMiddleware.js'
+import { loginUser, Register } from '../controllers/userController.js'
 
 const Route = express.Router()
 

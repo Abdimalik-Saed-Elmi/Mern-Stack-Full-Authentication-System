@@ -3,6 +3,9 @@ import crypto from "crypto";
 import sendEmail from "../utils/sendEmail.js";
 import bcrypt from "bcryptjs";
 import User from "../models/userModel.js";
+import { unverifiedUsers } from "./userController.js";
+
+
 
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
@@ -71,36 +74,32 @@ export const verifyEmail = async (req, res) => {
     try {
         const { email, verificationCode } = req.body;
 
-        // Check if email and verification code are provided
-        if (!email || !verificationCode) {
-            return res
-                .status(400)
-                .json({ message: "Email and verification code are required." });
+        // Ka soo hel xogta isticmaalaha ku meel gaarka ah
+        const unverifiedData = unverifiedUsers.get(email);
+
+        if (!unverifiedData) {
+            return res.status(404).json({ message: "User not found or registration expired." });
         }
 
-        // Find the user based on the email
-        const user = await User.findOne({ email });
-
-        // Check if the user was found
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
-        }
-
-        // Check if the verification code is correct and not expired
+        // Hubi koodka xaqiijinta
         if (
-            user.verificationCode !== verificationCode ||
-            user.verificationCodeExpiry < new Date()
+            unverifiedData.verificationCode !== verificationCode ||
+            unverifiedData.verificationCodeExpiry < new Date()
         ) {
-            return res
-                .status(400)
-                .json({ message: "Invalid or expired verification code." });
+            unverifiedUsers.delete(email); // Ka saar haddii koodku khaldan yahay ama uu dhacay
+            return res.status(400).json({ message: "Invalid or expired verification code." });
         }
 
-        // Update the user, set isVerified to true, and remove the verification code
-        user.isVerified = true;
-        user.verificationCode = undefined;
-        user.verificationCodeExpiry = undefined;
+        // Keydi isticmaalaha database-ka
+        const user = new User({
+            username: unverifiedData.username,
+            email: unverifiedData.email,
+            password: unverifiedData.password,
+            isVerified: true,
+        });
         await user.save();
+
+        unverifiedUsers.delete(email); // Ka saar xogta ku meel gaarka ah
 
         res
             .status(200)
@@ -111,6 +110,7 @@ export const verifyEmail = async (req, res) => {
 };
 
 
+
 const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -119,35 +119,20 @@ export const resendVerificationCode = async (req, res) => {
     try {
         const { email } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: "Email is required." });
+        const unverifiedData = unverifiedUsers.get(email);
+
+        if (!unverifiedData) {
+            return res.status(404).json({ message: "User not found or registration expired." });
         }
 
-        const user = await User.findOne({ email });
+        const newVerificationCode = generateVerificationCode();
+        const newVerificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-        if (!user || user.isVerified) {
-            return res.status(400).json({ message: "Invalid email or account already verified." });
-        }
-
-        // Check the number of times the code has been sent (we can add a new field to the user model if needed)
-        if (user.resendCount >= 3 && user.resendTime > Date.now() - 5 * 60 * 1000) { // 5 minutes
-            return res.status(429).json({ message: "Too many requests. Please wait 5 minutes before trying again." });
-        }
-
-        // Generate a new code
-        const verificationCode = generateVerificationCode();
-        const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-
-        // Update the user with the new code and expiry time
-        user.verificationCode = verificationCode;
-        user.verificationCodeExpiry = verificationCodeExpiry;
-        user.resendCount = (user.resendCount || 0) + 1;
-        user.resendTime = Date.now();
-        await user.save();
+        unverifiedUsers.set(email, { ...unverifiedData, verificationCode: newVerificationCode, verificationCodeExpiry: newVerificationCodeExpiry });
 
         // Send the new code via email
         const subject = "Your New Email Verification Code";
-        const html = `<p>Your new email verification code is:</p><h3>${verificationCode}</h3><p>This code will expire in 15 minutes.</p>`;
+        const html = `<p>Your new email verification code is:</p><h3>${newVerificationCode}</h3><p>This code will expire in 15 minutes.</p>`;
 
         await sendEmail(email, subject, html);
 

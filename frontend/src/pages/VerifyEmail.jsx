@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import API from '../api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faPaperPlane, faClockRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faCheckCircle, faPaperPlane,} from '@fortawesome/free-solid-svg-icons';
 
 const VerifyEmail = () => {
     const [verificationCode, setVerificationCode] = useState('');
@@ -54,6 +54,7 @@ const VerifyEmail = () => {
                 transition={{ duration: 0.6, ease: "easeInOut" }}
             >
                 <div className="text-center">
+              
                     <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-5xl mb-4" />
                     <h2 className="text-3xl font-extrabold text-gray-800 mb-6">Verify Your Email</h2>
                     {email && <p className="mb-4 text-gray-700">We have sent a verification code to: <strong className="text-blue-600">{email}</strong></p>}
@@ -68,7 +69,7 @@ const VerifyEmail = () => {
                         className="shadow appearance-none border rounded-xl w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                         placeholder="Enter the 6-digit code"
                         value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
+                        onChange={(e) => setVerificationCode(e.target.value)}                        
                     />
                 </div>
                 {error && <motion.p className="text-red-500 text-sm italic mb-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{error}</motion.p>}
@@ -95,7 +96,13 @@ const VerifyEmail = () => {
                     </motion.button>
                 </div>
                 {resendError && <motion.p className="text-red-500 text-sm italic mt-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{resendError}</motion.p>}
+                <p className="text-center mt-6 ">
+                    <Link to="/register" className="text-blue-700 text-lg font-semibold hover:underline transition flex items-center justify-center">
+                        <FontAwesomeIcon icon={faArrowLeft} className="text-green-500 text-2xl mr-4" /> Back to Registration
+                    </Link>
+                </p>
             </motion.div>
+            
         </div>
     );
 };

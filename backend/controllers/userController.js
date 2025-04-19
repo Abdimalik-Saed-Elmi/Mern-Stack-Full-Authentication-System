@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../configs/config.js";
 import sendEmail from "../utils/sendEmail.js";
 
+// Keyd ku meel gaar ah oo lagu keydiyo xogta isticmaaleyaasha aan la xaqiijinin
+export const unverifiedUsers = new Map();
+
 // Function si loo soo saaro kood lix-god ah
 const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -19,14 +22,16 @@ export const Register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationCode = generateVerificationCode();
         const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 daqiiqo
-        const user = new User({
+        const user = { // Halkan waxaan ku abuurnay object kaliya, ma keydinayno
             username,
             email,
             password: hashedPassword,
             verificationCode,
             verificationCodeExpiry,
-        });
-        await user.save();
+        };
+
+        // Ku keydi xogta isticmaalaha ku meel gaar ah
+        unverifiedUsers.set(email, user);
 
         // U dir emailka xaqiijinta
         const subject = "Xaqiiji Emailkaaga";

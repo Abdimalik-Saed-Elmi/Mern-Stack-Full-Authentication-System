@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "^4.1.4",
     "axios": "^1.8.4",
     "framer-motion": "^12.7.4",
+    "login-system": "file:..",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
