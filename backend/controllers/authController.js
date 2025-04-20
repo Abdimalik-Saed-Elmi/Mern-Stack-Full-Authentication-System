@@ -6,7 +6,6 @@ import User from "../models/userModel.js";
 import { unverifiedUsers } from "./userController.js";
 
 
-
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
@@ -24,7 +23,8 @@ export const forgotPassword = async (req, res) => {
         user.resetTokenExpiry = expiry;
         await user.save();
 
-        const resetLink = `http://localhost:5173/reset-password/${token}`;
+        // Construct the reset link using the production domain
+        const resetLink = `${req.headers.origin}/reset-password/${token}`;
         const html = `
             <h2>Password Reset Request</h2>
             <p>Click the link below to reset your password:</p>
